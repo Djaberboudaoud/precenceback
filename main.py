@@ -11,6 +11,7 @@ from psycopg2 import Error as PostgreSQLError
 import psycopg2.extras
 import bcrypt
 import jwt
+from mangum import Mangum
 import os
 from datetime import datetime, timedelta
 from typing import Optional, List
@@ -651,3 +652,9 @@ def export_excel(
     }
     return StreamingResponse(iter([stream.getvalue()]), media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", headers=headers)
 
+
+# ─────────────────────────────────────────────
+# Serverless handler
+# ─────────────────────────────────────────────
+handler = Mangum(app)
+application = app  # for ASGI servers
