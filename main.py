@@ -218,10 +218,10 @@ def login(body: LoginRequest):
 def me(current_user: dict = Depends(get_current_user)):
     user_id = current_user["sub"]
     with db_cursor() as cur:
-                    cur.execute(
-                "SELECT id, username, role, COALESCE(NCENTRE, '') AS NCENTRE, COALESCE(NOMCENTRE, '') AS NOMCENTRE, created_at FROM users WHERE id = %s",
-                (user_id,),
-            )
+        cur.execute(
+            "SELECT id, username, role, COALESCE(NCENTRE, '') AS NCENTRE, COALESCE(NOMCENTRE, '') AS NOMCENTRE, created_at FROM users WHERE id = %s",
+            (user_id,),
+        )
         user = cur.fetchone()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
