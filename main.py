@@ -195,9 +195,7 @@ def login(body: LoginRequest):
     if not valid:
         raise HTTPException(status_code=401, detail="اسم المستخدم أو كلمة المرور غير صحيحة")
 
-    token = create_token(
-        {"sub": str(user["id"]), "username": user["username"], "role": user["role"], "NCENTRE": user.get("NCENTRE")}
-    )
+    token = create_token({"sub": str(user["id"]), "username": user["username"], "role": user["role"], "NCENTRE": user.get("NCENTRE"), "NOMCENTRE": user.get("NOMCENTRE")})
 
     return {
         "access_token": token,
