@@ -60,7 +60,7 @@ for i, row in enumerate(ws.iter_rows(values_only=True)):
     nom = clean_val(row[8])
     prenom = clean_val(row[9])
     wilaya = clean_val(row[10])
-    ncentre = clean_val(row[11])
+    ncentre = clean_val(row[11]) or "unknown"
     nsalle = clean_val(row[12])
     status_val = "unmarked"
     batch.append((id_val, iannexe, ianneeins, inseq, ordrec, icode, niveau, filiere, matiere, nom, prenom, wilaya, ncentre, nsalle, status_val))

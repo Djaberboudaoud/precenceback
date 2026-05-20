@@ -175,7 +175,7 @@ def health():
 def login(body: LoginRequest):
     with db_cursor() as cur:
         cur.execute(
-            "SELECT id, username, password, role, NCENTRE, NOMCENTRE, created_at "
+            "SELECT id, username, password, role, COALESCE(NCENTRE, '') AS NCENTRE, COALESCE(NOMCENTRE, '') AS NOMCENTRE, created_at "
             "FROM users WHERE username = %s",
             (body.username,),
         )
@@ -195,7 +195,7 @@ def login(body: LoginRequest):
     if not valid:
         raise HTTPException(status_code=401, detail="اسم المستخدم أو كلمة المرور غير صحيحة")
 
-    token = create_token({"sub": str(user["id"]), "username": user["username"], "role": user["role"], "NCENTRE": user.get("NCENTRE"), "NOMCENTRE": user.get("NOMCENTRE")})
+    token = create_token({"sub": str(user["id"]), "username": user["username"], "role": user["role"], "NCENTRE": user.get("NCENTRE") or "", "NOMCENTRE": user.get("NOMCENTRE") or ""})
 
     return {
         "access_token": token,
@@ -203,8 +203,8 @@ def login(body: LoginRequest):
             "id": user["id"],
             "username": user["username"],
             "role": user["role"],
-            "NCENTRE": user.get("NCENTRE"),
-            "NOMCENTRE": user.get("NOMCENTRE"),
+            "NCENTRE": user.get("NCENTRE") or "",
+            "NOMCENTRE": user.get("NOMCENTRE") or "",
             "created_at": str(user.get("created_at", "")),
         },
     }
@@ -214,10 +214,10 @@ def login(body: LoginRequest):
 def me(current_user: dict = Depends(get_current_user)):
     user_id = current_user["sub"]
     with db_cursor() as cur:
-        cur.execute(
-            "SELECT id, username, role, NCENTRE, NOMCENTRE, created_at FROM users WHERE id = %s",
-            (user_id,),
-        )
+                    cur.execute(
+                "SELECT id, username, role, COALESCE(NCENTRE, '') AS NCENTRE, COALESCE(NOMCENTRE, '') AS NOMCENTRE, created_at FROM users WHERE id = %s",
+                (user_id,),
+            )
         user = cur.fetchone()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -238,7 +238,7 @@ def me(current_user: dict = Depends(get_current_user)):
 def list_users(admin=Depends(require_admin)):
     with db_cursor() as cur:
         cur.execute(
-            "SELECT id, username, role, NCENTRE, NOMCENTRE, created_at FROM users ORDER BY created_at DESC"
+                "SELECT id, username, role, COALESCE(NCENTRE, '') AS NCENTRE, COALESCE(NOMCENTRE, '') AS NOMCENTRE, created_at FROM users ORDER BY created_at DESC"
         )
         return cur.fetchall()
 
