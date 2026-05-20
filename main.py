@@ -179,7 +179,7 @@ def health():
 def login(body: LoginRequest):
     with db_cursor() as cur:
         cur.execute(
-            "SELECT id, username, password, role, COALESCE(NCENTRE, '') AS NCENTRE, COALESCE(NOMCENTRE, '') AS NOMCENTRE, created_at "
+            "SELECT id, username, password, role, COALESCE(ncentre, '') AS \"NCENTRE\", COALESCE(nomcentre, '') AS \"NOMCENTRE\", created_at "
             "FROM users WHERE username = %s",
             (body.username,),
         )
@@ -219,7 +219,7 @@ def me(current_user: dict = Depends(get_current_user)):
     user_id = current_user["sub"]
     with db_cursor() as cur:
         cur.execute(
-            "SELECT id, username, role, COALESCE(NCENTRE, '') AS NCENTRE, COALESCE(NOMCENTRE, '') AS NOMCENTRE, created_at FROM users WHERE id = %s",
+            "SELECT id, username, role, COALESCE(ncentre, '') AS \"NCENTRE\", COALESCE(nomcentre, '') AS \"NOMCENTRE\", created_at FROM users WHERE id = %s",
             (user_id,),
         )
         user = cur.fetchone()
@@ -242,7 +242,7 @@ def me(current_user: dict = Depends(get_current_user)):
 def list_users(admin=Depends(require_admin)):
     with db_cursor() as cur:
         cur.execute(
-                "SELECT id, username, role, COALESCE(NCENTRE, '') AS NCENTRE, COALESCE(NOMCENTRE, '') AS NOMCENTRE, created_at FROM users ORDER BY created_at DESC"
+            "SELECT id, username, role, COALESCE(ncentre, '') AS \"NCENTRE\", COALESCE(nomcentre, '') AS \"NOMCENTRE\", created_at FROM users ORDER BY created_at DESC"
         )
         return cur.fetchall()
 
