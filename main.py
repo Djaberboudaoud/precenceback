@@ -430,6 +430,16 @@ class UpdateStatusRequest(BaseModel):
     filiere: Optional[str] = None
     matiere: Optional[str] = None
 
+class StudentStatusUpdate(BaseModel):
+    ID: str
+    status: str
+    niveau: Optional[str] = None
+    filiere: Optional[str] = None
+    matiere: Optional[str] = None
+
+class BulkUpdateStatusRequest(BaseModel):
+    updates: List[StudentStatusUpdate]
+
 @app.patch("/api/students/{student_id}/status", tags=["Students"])
 def update_student_status(student_id: str, body: UpdateStatusRequest, current_user: dict = Depends(get_current_user)):
     conditions = ["ID = %s"]
@@ -456,6 +466,33 @@ def update_student_status(student_id: str, body: UpdateStatusRequest, current_us
         if cur.rowcount == 0:
             raise HTTPException(status_code=404, detail="Student row not found to update")
     return {"message": "Status updated"}
+
+@app.patch("/api/students/bulk-status", tags=["Students"])
+def bulk_update_status(body: BulkUpdateStatusRequest, current_user: dict = Depends(get_current_user)):
+    with db_cursor(commit=True) as cur:
+        for update in body.updates:
+            conditions = ["ID = %s"]
+            params = [update.ID]
+            
+            if current_user["role"] == "school":
+                conditions.append("NCENTRE = %s")
+                params.append(current_user["NCENTRE"])
+            if update.niveau:
+                conditions.append("NIVEAU = %s")
+                params.append(update.niveau)
+            if update.filiere:
+                conditions.append("FILIERE = %s")
+                params.append(update.filiere)
+            if update.matiere:
+                conditions.append("MATIERE = %s")
+                params.append(update.matiere)
+                
+            where = " AND ".join(conditions)
+            params.insert(0, update.status)
+            
+            cur.execute(f"UPDATE school_students SET status = %s WHERE {where}", params)
+            
+    return {"message": "Statuses updated successfully"}
 
 @app.post("/api/students/reset-status", tags=["Students"])
 def reset_all_attendance(admin=Depends(require_admin)):
